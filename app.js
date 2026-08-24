@@ -1,116 +1,34 @@
-const express = require('express');
-const cors = require('cors');
-const multer = require('multer');
-const path = require('path');
-
-const {
-  initDb,
-  Store,
-  Product,
-  DeliveryMan,
-  Order,
-  OrderItem,
-  calculateDistanceKm,
-  calculateDeliveryFee,
-} = require('./models');
+const express = require("express");
+const cors = require("cors");
+const path = require("path");
+const mongoose = require("mongoose");
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 
 app.use(cors());
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// إعداد رفع صورة إيصال شام كاش
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, 'uploads'));
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + '-' + file.originalname);
-  },
-});
-const upload = multer({ storage });
+// اتصال قاعدة البيانات
+mongoose.connect(process.env.MONGO_URL || "mongodb://localhost:27017/yaman_delivery")
+  .then(() => console.log("MongoDB Connected"))
+  .catch(err => console.log("DB Error:", err));
 
-// إنشاء متجر
-app.post('/api/stores', async (req, res) => {
-  try {
-    const store = await Store.create(req.body);
-    res.status(201).json(store);
-  } catch (err) {
-    res.status(500).json({ error: 'Error creating store' });
-  }
-});
+// المسارات
+const categoriesRoutes = require("./routes/categories");
+const storesRoutes = require("./routes/stores");
+const productsRoutes = require("./routes/products");
+const ordersRoutes = require("./routes/orders");
+const deliveryWorkersRoutes = require("./routes/deliveryWorkers");
 
-// جلب المتاجر
-app.get('/api/stores', async (req, res) => {
-  try {
-    const stores = await Store.findAll({ where: { isActive: true } });
-    res.json(stores);
-  } catch (err) {
-    res.status(500).json({ error: 'Error fetching stores' });
-  }
-});
+app.use("/api/categories", categoriesRoutes);
+app.use("/api/stores", storesRoutes);
+app.use("/api/products", productsRoutes);
+app.use("/api/orders", ordersRoutes);
+app.use("/api/delivery-workers", deliveryWorkersRoutes);
 
-// إنشاء منتج
-app.post('/api/products', async (req, res) => {
-  try {
-    const product = await Product.create(req.body);
-    res.status(201).json(product);
-  } catch (err) {
-    res.status(500).json({ error: 'Error creating product' });
-  }
-});
-
-// تحديث منتج
-app.put('/api/products/:id', async (req, res) => {
-  try {
-    const product = await Product.findByPk(req.params.id);
-    if (!product) return res.status(404).json({ error: 'Product not found' });
-
-    await product.update(req.body);
-    res.json(product);
-  } catch (err) {
-    res.status(500).json({ error: 'Error updating product' });
-  }
-});
-
-// حذف منتج
-app.delete('/api/products/:id', async (req, res) => {
-  try {
-    const product = await Product.findByPk(req.params.id);
-    if (!product) return res.status(404).json({ error: 'Product not found' });
-
-    await product.destroy();
-    res.json({ message: 'Product deleted' });
-  } catch (err) {
-    res.status(500).json({ error: 'Error deleting product' });
-  }
-});
-
-// جلب منتجات متجر
-app.get('/api/stores/:storeId/products', async (req, res) => {
-  try {
-    const products = await Product.findAll({
-      where: { storeId: req.params.storeId, isAvailable: true },
-    });
-    res.json(products);
-  } catch (err) {
-    res.status(500).json({ error: 'Error fetching products' });
-  }
-});
-
-// إضافة سائق
-app.post('/api/delivery-men', async (req, res) => {
-  try {
-    const deliveryMan = await DeliveryMan.create(req.body);
-    res.status(201).json(deliveryMan);
-  } catch (err) {
-    res.status(500).json({ error: 'Error creating delivery man' });
-  }
-});
-
+app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));
 // تحديث موقع السائق
 app.put('/api/delivery-men/:id/location', async (req, res) => {
   try {
