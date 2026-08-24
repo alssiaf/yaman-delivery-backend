@@ -277,3 +277,5 @@ app.get('/api/admin/reports', async (req, res) => {
 initDb().then(() => {
   app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));
 });
+const categoriesRoutes = require("./routes/categories");
+app.use("/api/categories", categoriesRoutes);
