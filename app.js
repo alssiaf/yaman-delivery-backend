@@ -285,3 +285,5 @@ const productsRoutes = require("./routes/products");
 app.use("/api/products", productsRoutes);
 const ordersRoutes = require("./routes/orders");
 app.use("/api/orders", ordersRoutes);
+const deliveryWorkersRoutes = require("./routes/deliveryWorkers");
+app.use("/api/delivery-workers", deliveryWorkersRoutes);
