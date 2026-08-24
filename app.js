@@ -279,3 +279,5 @@ initDb().then(() => {
 });
 const categoriesRoutes = require("./routes/categories");
 app.use("/api/categories", categoriesRoutes);
+const storesRoutes = require("./routes/stores");
+app.use("/api/stores", storesRoutes);
