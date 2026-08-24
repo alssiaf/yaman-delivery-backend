@@ -281,3 +281,5 @@ const categoriesRoutes = require("./routes/categories");
 app.use("/api/categories", categoriesRoutes);
 const storesRoutes = require("./routes/stores");
 app.use("/api/stores", storesRoutes);
+const productsRoutes = require("./routes/products");
+app.use("/api/products", productsRoutes);
