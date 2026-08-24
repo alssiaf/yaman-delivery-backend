@@ -283,3 +283,5 @@ const storesRoutes = require("./routes/stores");
 app.use("/api/stores", storesRoutes);
 const productsRoutes = require("./routes/products");
 app.use("/api/products", productsRoutes);
+const ordersRoutes = require("./routes/orders");
+app.use("/api/orders", ordersRoutes);
